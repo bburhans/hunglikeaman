@@ -414,7 +414,15 @@ while (1)
     my $buf;
     if ($handle == $sock)
     {
-      if (sysread($handle, $buf, 512) > 0)
+      my $sysread = sysread($handle, $buf, 512);
+      if (!defined($sysread))
+      {
+        syswrite STDERR, "sysread failed: $!\n";
+        $in->remove($handle);
+        close($handle);
+        exit 1;
+      }
+      elsif ($sysread > 0)
       {
         my $lastreadwrite = time();
         process($buf);
